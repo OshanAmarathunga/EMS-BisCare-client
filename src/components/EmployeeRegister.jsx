@@ -110,7 +110,7 @@ const EmployeeRegister = () => {
     }
 
     const handleUpdate=()=>{
-        //handleOpen();
+        handleOpen();
         const data={
             "firstName":firstName,
             "lastName": lastName,
