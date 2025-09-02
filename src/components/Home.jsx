@@ -18,6 +18,7 @@ import Typography from '@mui/material/Typography';
 import Attendence from "./Attendence.jsx";
 import EmployeeRegister from "./EmployeeRegister.jsx";
 import SalaryCategory from "./SalaryCategory.jsx";
+import Adjestment from "./Adjestment.jsx";
 const drawerWidth = 240;
 
 
@@ -47,7 +48,7 @@ function Home(props) {
             <Toolbar />
             <Divider />
             <List>
-                {['Attendence', 'EMP Register', 'Cash Advance', 'Bonus',"Payment","Salary Category"].map((text, index) => (
+                {['Attendence', 'EMP Register', 'Cash Advance', 'Bonus',"Payment","Salary Category","Adjestment"].map((text, index) => (
                     <ListItem key={text} disablePadding>
                         <ListItemButton onClick={()=>{setActivePage(text); handleDrawerClose();}}>
                             {/*<ListItemIcon>*/}
@@ -71,6 +72,8 @@ function Home(props) {
                 return <EmployeeRegister/>;
             case "Salary Category":
                 return <SalaryCategory/>;
+            case "Adjestment":
+                return <Adjestment/>;
         }
     };
 

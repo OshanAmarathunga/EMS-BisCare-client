@@ -29,7 +29,7 @@ function Attendence() {
                 setEmployeeList(res.data.employeeList);
             })
             .catch((e)=>{
-                console.log(e)
+                console.log(e);
             })
     }
 
@@ -40,6 +40,7 @@ function Attendence() {
     const inEmployee=(emp)=>{
         handleOpen();
         const data={
+            "empPrimaryKey":emp._id,
             "empNo": emp.empNo
         }
         axios.post(url+"/v1/working-hour/save-in",data)
@@ -63,6 +64,22 @@ function Attendence() {
                 handleClose();
             });
     }
+    function formatSLDateTime(dateString){
+        if (!dateString) return "-";
+        return new Date(dateString)
+            .toLocaleString("en-GB", {
+                timeZone: "Asia/Colombo",
+                year: "2-digit",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+            })
+            .replace(",", "")
+            .toUpperCase();
+    }
+
     return (
         <div>
             <Toaster richColors position="top-center" />
@@ -84,6 +101,7 @@ function Attendence() {
                             <TableRow>
                                 <TableCell align="center">Employee No</TableCell>
                                 <TableCell align="center">First Name</TableCell>
+                                <TableCell align="center">In-Time</TableCell>
                                 <TableCell align="center">Attendance</TableCell>
                             </TableRow>
                         </TableHead>
@@ -95,6 +113,9 @@ function Attendence() {
                                 >
                                     <TableCell align="center">{emp.empNo}</TableCell>
                                     <TableCell align="center">{emp.firstName}</TableCell>
+                                    <TableCell align="center">{emp.lastWorkingHour?.startDateTime && emp.lastWorkingHour.status === "IN"
+                                        ? formatSLDateTime(emp.lastWorkingHour.startDateTime)
+                                        : "-"}</TableCell>
                                     <TableCell align="center">
                                         {emp.lastWorkingHour.status=="IN" &&
                                             <Button onClick={()=>outEmployee(emp)} variant="contained" color="error">
