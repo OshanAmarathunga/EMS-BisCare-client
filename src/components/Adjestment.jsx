@@ -15,6 +15,11 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import CancelIcon from '@mui/icons-material/Cancel';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
 
 function Adjestment(props) {
     const [empWorkingHourList,setEmpWorkingHourList] = useState([]);
@@ -23,12 +28,30 @@ function Adjestment(props) {
     const url=import.meta.env.VITE_SERVER_URL;
     const [open, setOpen] = React.useState(false);
     const [openDialog, setOpenDialog] = React.useState(false);
+    const [openUpdateDialog, setOpenUpdateDialog] = React.useState(false);
+    const [workingHourPrimaryKey,setWorkingHourKey]=useState("");
+    const [startDate,setStartDate]=useState(dayjs());
+    const [endDate,setEndDate]=useState("");
 
-    const handleDialogOpen = () => setOpenDialog(true);
-    const handleDialogClose = () => setOpenDialog(false);
+    const handleDialogOpen = () => {
+        setOpenDialog(true);
+    }
+    const handleDialogClose = () =>{
+        setOpenDialog(false);
+    }
 
     const handleConfirm = () => {
-        console.log("Confirmed!");
+        handleOpen();
+        axios.post(url+`/v1/working-hour/make-validity/${workingHourPrimaryKey}`)
+            .then((response) => {
+                handleClose();
+                getWorkingHourList()
+                toast.success('Validity changed !');
+            })
+            .catch((error) => {
+                handleClose();
+                toast.error('Update error : '+error.message);
+            })
         handleDialogClose();
     };
 
@@ -113,7 +136,7 @@ function Adjestment(props) {
                     </Button>
                 </div>
                 <div >
-                    <Button sx={{ padding: "2px 8px" }} disabled={empPrimaryKey==""?true:false}  variant="contained" color="warning">
+                    <Button sx={{ padding: "2px 8px" }} disabled={empPrimaryKey==""?true:false} onClick={()=>setOpenUpdateDialog(true)}  variant="contained" color="warning">
                         +
                     </Button>
                 </div>
@@ -139,11 +162,9 @@ function Adjestment(props) {
                                         <TableCell align="center">{formatSLDateTime(emp.startDateTime)}</TableCell>
                                         <TableCell align="center">{formatSLDateTime(emp?.endDateTime)}</TableCell>
                                         <TableCell align="center">{emp.isActive==true?
-                                            <Button onClick={handleDialogOpen}  variant="contained" color="success" sx={{ padding: "0.01px 0.1px" }}>
+                                            <Button onClick={(e)=>{handleDialogOpen(),setWorkingHourKey(emp._id)}}  variant="contained" color="success" sx={{ padding: "0.01px 0.1px" }}>
                                                 Valid
-                                            </Button> :<Button  variant="contained" color="error" sx={{ padding: "0.01px 0.1px" }}>
-                                                Search
-                                            </Button>
+                                            </Button> :<CancelIcon sx={{ color: 'red' }} onClick={(e)=>{handleDialogOpen(),setWorkingHourKey(emp._id)}}/>
                                         }</TableCell>
 
                                     </TableRow>
@@ -154,7 +175,7 @@ function Adjestment(props) {
 
                 <div>
                     <Dialog open={openDialog} onClose={handleDialogClose}>
-                        <DialogTitle>Do you want to cancle this ?</DialogTitle>
+                        <DialogTitle>Do you want to change this ?</DialogTitle>
                         {/*<DialogContent>*/}
                         {/*    <DialogContentText>Are you sure?</DialogContentText>*/}
                         {/*</DialogContent>*/}
@@ -162,8 +183,30 @@ function Adjestment(props) {
                             <Button onClick={handleDialogClose} color="primary">
                                 Cancel
                             </Button>
-                            <Button onClick={handleConfirm} color="error" autoFocus>
+                            <Button onClick={()=>handleConfirm()} color="error" autoFocus>
                                 Yes
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+                </div>
+                <div >
+                    <Dialog open={openUpdateDialog} onClose={handleClose}>
+                        <DialogTitle>Add In and Out Data</DialogTitle>
+                        <DialogContent>
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <DateTimePicker
+                                    label="Start Time"
+                                    value={startDate}
+                                    onChange={(newValue) => setStartDate(newValue)}
+                                    slotProps={{ textField: { fullWidth: true, margin: "dense" } }}
+                                />
+                            </LocalizationProvider>
+
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={()=>setOpenUpdateDialog(false)}>Cancel</Button>
+                            <Button variant="contained" >
+                                Update
                             </Button>
                         </DialogActions>
                     </Dialog>
