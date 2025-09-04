@@ -21,7 +21,7 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 
-function Adjestment(props) {
+function Adjestment() {
     const [empWorkingHourList,setEmpWorkingHourList] = useState([]);
     const [empList,setEmpList] = useState([]);
     const [empPrimaryKey,setEmpPrimaryKey] = useState("");
@@ -31,7 +31,7 @@ function Adjestment(props) {
     const [openUpdateDialog, setOpenUpdateDialog] = React.useState(false);
     const [workingHourPrimaryKey,setWorkingHourKey]=useState("");
     const [startDate,setStartDate]=useState(dayjs());
-    const [endDate,setEndDate]=useState("");
+    const [endDate,setEndDate]=useState(dayjs());
 
     const handleDialogOpen = () => {
         setOpenDialog(true);
@@ -86,6 +86,35 @@ function Adjestment(props) {
         getAllEmployees();
     },[]);
 
+    function handleAddNewData(){
+        // Convert to Date objects for comparison
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        if (start >= end) {
+            toast.error("Start date must be earlier than end date!");
+            return; // ⛔ stop execution, don’t call API
+        }
+        handleOpen();
+        const data={
+            "startDate":startDate,
+            "endDate":endDate,
+            "empPrimaryKey":empPrimaryKey,
+        }
+        axios.post(url+"/v1/working-hour/add-working-times",data)
+            .then((res)=>{
+                setOpenUpdateDialog(false);
+                getWorkingHourList();
+                handleClose();
+                toast.success('Added new entry!');
+            })
+            .catch((error)=>{
+                setOpenUpdateDialog(false);
+                handleClose();
+                toast.error('Not saved, try again : '+error.message);
+            })
+    }
+
     function formatSLDateTime(dateString){
         if (!dateString) return "-";
         return new Date(dateString)
@@ -117,7 +146,9 @@ function Adjestment(props) {
                 <div>
                     <select
                         // value={salaryCategoryId}
-                        onChange={(e) => setEmpPrimaryKey(e.target.value)}
+                        onChange={(e) =>{
+                            setEmpPrimaryKey(e.target.value);
+                        }}
                         className='ml-[15px] bg-amber-50 border rounded px-2 py-1'
                         required
                     >
@@ -136,7 +167,7 @@ function Adjestment(props) {
                     </Button>
                 </div>
                 <div >
-                    <Button sx={{ padding: "2px 8px" }} disabled={empPrimaryKey==""?true:false} onClick={()=>setOpenUpdateDialog(true)}  variant="contained" color="warning">
+                    <Button sx={{ padding: "2px 8px" }} disabled={empPrimaryKey==""?true:false} onClick={()=>{setOpenUpdateDialog(true),setStartDate(dayjs()),setEndDate(dayjs())}}  variant="contained" color="warning">
                         +
                     </Button>
                 </div>
@@ -203,9 +234,20 @@ function Adjestment(props) {
                             </LocalizationProvider>
 
                         </DialogContent>
+                        <DialogContent>
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <DateTimePicker
+                                    label="End Time"
+                                    value={endDate}
+                                    onChange={(newValue) => setEndDate(newValue)}
+                                    slotProps={{ textField: { fullWidth: true, margin: "dense" } }}
+                                />
+                            </LocalizationProvider>
+
+                        </DialogContent>
                         <DialogActions>
                             <Button onClick={()=>setOpenUpdateDialog(false)}>Cancel</Button>
-                            <Button variant="contained" >
+                            <Button variant="contained" onClick={handleAddNewData} >
                                 Update
                             </Button>
                         </DialogActions>
