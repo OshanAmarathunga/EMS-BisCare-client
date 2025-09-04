@@ -210,7 +210,7 @@ const EmployeeRegister = () => {
                 <div  className="w-full overflow-hidden">
                     <TableContainer  sx={{
                         maxWidth:{
-                            xs: 500, md: '100%'
+                            xs: 450, md: '100%'
                         }
                     }}>
                         <Table  size="small" aria-label="a dense table" sx={{ minWidth: 900 }}>
