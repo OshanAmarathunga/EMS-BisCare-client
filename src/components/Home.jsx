@@ -19,6 +19,8 @@ import Attendence from "./Attendence.jsx";
 import EmployeeRegister from "./EmployeeRegister.jsx";
 import SalaryCategory from "./SalaryCategory.jsx";
 import Adjestment from "./Adjestment.jsx";
+import CashAdvance from "./CashAdvance.jsx";
+import Bonus from "./Bonus.jsx";
 const drawerWidth = 240;
 
 
@@ -74,6 +76,10 @@ function Home(props) {
                 return <SalaryCategory/>;
             case "Adjestment":
                 return <Adjestment/>;
+            case "Cash Advance":
+                return <CashAdvance/>;
+            case "Bonus":
+                return <Bonus/>;
         }
     };
 
