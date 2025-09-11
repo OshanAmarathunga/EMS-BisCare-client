@@ -19,12 +19,12 @@ function Bonus() {
     const url=import.meta.env.VITE_SERVER_URL;
     const [empPrimaryKey,setEmpPrimaryKey] = useState("");
     const [open, setOpen] = React.useState(false);
-    const [cashAdvanceList,setCashAdvanceList]=useState([]);
+    const [bonusList,setBonusList]=useState([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [amount,setAmount]=useState("");
     const [empName,setEmpName]=useState("");
     const [openVerifyDialog,setOpenVerifyDialog]=useState(false)
-    const [cashAdvanceId,setCashAdvanceId]=useState("");
+    const [bonusId,setBonusId]=useState("");
 
     const handleClose = () => {
         setOpen(false);
@@ -51,12 +51,11 @@ function Bonus() {
             })
     }
 
-    const getCashAdvanceList=()=>{
+    const getBonusList=()=>{
         handleOpen();
-        console.log("empPrimaryKey",empPrimaryKey);
         axios.get(url+`/v1/bonus/get-bonus/${empPrimaryKey}`)
             .then((res)=>{
-                setCashAdvanceList(res.data.cashAdvanceList);
+                setBonusList(res.data);
                 handleClose();
             })
             .catch((e)=>{
@@ -65,18 +64,18 @@ function Bonus() {
             })
     }
 
-    const saveCashAdvance=()=>{
+    const saveBonus=()=>{
         handleOpen();
         const data={
-            empNoPrimaryKey:empPrimaryKey,
+            empPrimaryKey:empPrimaryKey,
             amount:amount
         }
-        axios.post(url+"/v1/cash-advance/save-cash-advance", data)
+        axios.post(url+"/v1/bonus/save-bonus", data)
             .then((res)=>{
                 handleClose();
                 setOpenDialog(false);
                 toast.success('Cash Advance saved!');
-                getCashAdvanceList();
+                getBonusList();
             })
             .catch((error)=>{
                 handleClose();
@@ -107,11 +106,11 @@ function Bonus() {
 
     function handleConfirm(){
         handleOpen();
-        axios.put(url+`/v1/cash-advance/change-status/${cashAdvanceId}`)
+        axios.put(url+`/v1/bonus/change-status/${bonusId}`)
             .then((res)=>{
                 handleClose();
                 toast.success('Updated success!');
-                getCashAdvanceList();
+                getBonusList();
                 setOpenVerifyDialog(false);
             })
             .catch((error)=>{
@@ -151,7 +150,7 @@ function Bonus() {
                     </select>
                 </div>
                 <div >
-                    <Button sx={{ padding: "2px 8px" }} disabled={empPrimaryKey==""?true:false} onClick={()=>getCashAdvanceList()} variant="contained" color="success">
+                    <Button sx={{ padding: "2px 8px" }} disabled={empPrimaryKey==""?true:false} onClick={()=>getBonusList()} variant="contained" color="success">
                         Search
                     </Button>
                 </div>
@@ -164,7 +163,7 @@ function Bonus() {
             <div>
                 <div >
                     <Dialog open={openDialog} onClose={handleClose}>
-                        <DialogTitle>Add cash Advance to {empName}</DialogTitle>
+                        <DialogTitle>Add Bonus to {empName}</DialogTitle>
                         <DialogContent>
                             <TextField
                                 margin="dense"
@@ -178,7 +177,7 @@ function Bonus() {
                         </DialogContent>
                         <DialogActions>
                             <Button onClick={handleCloseDialog}>Cancel</Button>
-                            <Button variant="contained" onClick={saveCashAdvance}>
+                            <Button variant="contained" onClick={saveBonus}>
                                 Update
                             </Button>
                         </DialogActions>
@@ -200,16 +199,18 @@ function Bonus() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {cashAdvanceList.map((emp) => (
+                            {bonusList.map((bonus) => (
                                 <TableRow
-                                    key={emp._id}
+                                    key={bonus._id}
                                 >
-                                    <TableCell align="center">{formatSLDateTime(emp.date)}</TableCell>
-                                    <TableCell align="center">{emp.amount}</TableCell>
-                                    <TableCell align="center">{emp.status==true?
-                                        <Button onClick={(e)=>{setOpenVerifyDialog(true),setCashAdvanceId(emp._id)}}  variant="contained" color="success" sx={{ padding: "0.01px 0.1px" }}>
+                                    <TableCell align="center">{formatSLDateTime(bonus.date)}</TableCell>
+                                    <TableCell align="center">{bonus.amount}</TableCell>
+                                    <TableCell align="center">{bonus.status==true?
+                                        <Button onClick={(e)=>{setOpenVerifyDialog(true),setBonusId(bonus._id)}}  variant="contained" color="success" sx={{ padding: "0.01px 0.1px" }}>
                                             Valid
-                                        </Button> :<CancelIcon sx={{ color: 'red' }} onClick={(e)=>{setOpenVerifyDialog(true),setCashAdvanceId(emp._id)}}/>
+                                        </Button>
+                                        :
+                                        <CancelIcon sx={{ color: 'red' }} onClick={(e)=>{setOpenVerifyDialog(true),setBonusId(bonus._id)}}/>
                                     }</TableCell>
 
                                 </TableRow>
