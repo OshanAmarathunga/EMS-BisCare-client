@@ -9,7 +9,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Button from '@mui/material/Button';
-import {Toaster} from "sonner";
+import {toast, Toaster} from "sonner";
 
 function Attendence() {
     const [employeeList,setEmployeeList]=useState([]);
@@ -24,12 +24,16 @@ function Attendence() {
     };
 
     const getAllEmployees=()=>{
+        handleOpen();
         axios.get(url+"/v1/employee/get-all-employee-with-last-working-data")
             .then((res)=>{
                 setEmployeeList(res.data.employeeList);
+                handleClose();
             })
             .catch((e)=>{
+                toast.error('System error: '+e.message);
                 console.log(e);
+                handleClose();
             })
     }
 
