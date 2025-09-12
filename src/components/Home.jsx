@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState,useEffect} from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -21,6 +21,7 @@ import SalaryCategory from "./SalaryCategory.jsx";
 import Adjestment from "./Adjestment.jsx";
 import CashAdvance from "./CashAdvance.jsx";
 import Bonus from "./Bonus.jsx";
+import EmpSummary from "./EmpSummary.jsx";
 const drawerWidth = 240;
 
 
@@ -28,7 +29,8 @@ function Home(props) {
     const { window } = props;
     const [mobileOpen, setMobileOpen] = React.useState(false);
     const [isClosing, setIsClosing] = React.useState(false);
-    const [activePage,setActivePage]=useState("Home");
+    const [activePage,setActivePage]=useState("Attendence");
+    const [currentTime, setCurrentTime] = useState(new Date());
 
     const handleDrawerClose = () => {
         setIsClosing(true);
@@ -44,19 +46,39 @@ function Home(props) {
             setMobileOpen(!mobileOpen);
         }
     };
+    const formatTime = (date) =>
+        date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000);
+
+        return () => clearInterval(timer); // cleanup
+    }, []);
 
     const drawer = (
-        <div>
+        <div style={{
+            width: 240,
+            backgroundColor: "#1e1e2f", // dark sidebar
+            height: "100%",
+            color: "#fff",
+        }}>
             <Toolbar />
             <Divider />
             <List>
-                {['Attendence', 'EMP Register', 'Cash Advance', 'Bonus',"Payment","Salary Category","Adjestment"].map((text, index) => (
+                {['Attendence', 'EMP Register', 'Cash Advance', 'Bonus',"Payment","Salary Category","Adjestment",'Summary'].map((text, index) => (
                     <ListItem key={text} disablePadding>
-                        <ListItemButton onClick={()=>{setActivePage(text); handleDrawerClose();}}>
-                            {/*<ListItemIcon>*/}
-                            {/*    {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}*/}
-                            {/*</ListItemIcon>*/}
-                            <ListItemText primary={text} />
+                        <ListItemButton sx={{
+                            color: activePage === text ? "#FFD700" : "#fff", // gold if active
+                            backgroundColor: activePage === text ? "#33334d" : "transparent",
+                            "&:hover": {
+                                backgroundColor: "#55557a",
+                                color: "#FFD700"
+                            },
+                        }} onClick={()=>{setActivePage(text); handleDrawerClose();}}>
+
+                            <ListItemText primaryTypographyProps={{ fontWeight: activePage === text ? "bold" : "normal" }} primary={text} />
                         </ListItemButton>
                     </ListItem>
                 ))}
@@ -80,6 +102,8 @@ function Home(props) {
                 return <CashAdvance/>;
             case "Bonus":
                 return <Bonus/>;
+            case "Summary":
+                return <EmpSummary/>
         }
     };
 
@@ -87,7 +111,13 @@ function Home(props) {
         <Box sx={{ display: 'flex' }}>
             <CssBaseline />
             <AppBar position="fixed" sx={{width: { sm: `calc(100% - ${drawerWidth}px)` }, ml: { sm: `${drawerWidth}px` },}}>
-                <Toolbar>
+                <Toolbar style={{
+                    backgroundColor: "#1e1e2f", // dark sidebar
+                    color: "#fff",
+                    justifyContent: "space-between", // push content to both ends
+                    alignItems: "center"
+                }}>
+                    <Box display="flex" alignItems="center">
                     <IconButton
                         color="inherit"
                         aria-label="open drawer"
@@ -97,8 +127,12 @@ function Home(props) {
                     >
                         <MenuIcon />
                     </IconButton>
-                    <Typography variant="h6" noWrap component="div">
+                    <Typography variant="h6" noWrap component="div" >
                         EMS-BisCare
+                    </Typography>
+                    </Box>
+                    <Typography variant="body1" component="div">
+                        {formatTime(currentTime)}
                     </Typography>
                 </Toolbar>
             </AppBar>
