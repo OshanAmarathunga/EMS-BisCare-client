@@ -188,7 +188,9 @@ function Bonus() {
                 <TableContainer  sx={{
                     maxWidth:{
                         xs: 450, md: '100%'
-                    }
+                    },
+                    maxHeight: 500,
+                    overflowY: 'auto'
                 }}>
                     <Table  size="small" aria-label="a dense table" sx={{ minWidth: 300 }}>
                         <TableHead>

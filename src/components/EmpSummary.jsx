@@ -57,7 +57,7 @@ const EmpSummary = () => {
         }else {
             setOpenDialog(false);
             const data={
-                empNoPrimaryKey:empKey,
+                empPrimaryKey:empKey,
                 amount:amount
             }
             axios.post(url+"/v1/payment-detail/employee-payment",data)
@@ -90,8 +90,8 @@ const EmpSummary = () => {
                 </Backdrop>
                 <h1 className='text-2xl font-bold'>Summary</h1>
                 <br/>
-                <div className="grid grid-cols-2 content-between">
-                    <div>
+                <div className="grid sm:grid-cols-1 lg:grid-cols-2 content-between">
+                    <div className="mt-3">
                         <div>
                             <Button sx={{padding: "2px 8px"}} onClick={getSummaryList} variant="contained"
                                     color="success">
@@ -99,7 +99,7 @@ const EmpSummary = () => {
                             </Button>
                         </div>
                     </div>
-                    <div className="bg-amber-300 text-center rounded-xl h-[35px] content-center ">
+                    <div className="bg-amber-300 text-center rounded-xl h-[35px] content-center mt-3">
                         <h2 className="font-bold text-shadow-2xs">Total Payable : Rs. {cumulativeBalance}</h2>
                     </div>
                 </div>
@@ -108,7 +108,9 @@ const EmpSummary = () => {
                 <TableContainer  sx={{
                     maxWidth:{
                         xs: 450, md: '100%'
-                    }
+                    },
+                    maxHeight: 500,
+                    overflowY: 'auto'
                 }}>
                     <Table  size="small" aria-label="a dense table" sx={{ minWidth: 300 }}>
                         <TableHead>
@@ -137,7 +139,8 @@ const EmpSummary = () => {
                                     <TableCell align="center" style={{ color:sum.balanceAmount<0?"red":"green",fontWeight:"bold",fontFamily:"sans-serif"}}>{sum.payableAmount}</TableCell>
                                     <TableCell align="center">{sum.paidAmount}</TableCell>
                                     <TableCell align="center" style={{ color:sum.balanceAmount<0?"red":"green",fontWeight:"bold",fontSize:"large",fontFamily:"sans-serif"}}>{sum.balanceAmount}</TableCell>
-                                    <TableCell align="center" sx={{
+                                    { sum.balanceAmount!=0 &&
+                                        <TableCell align="center" sx={{
                                         cursor: "pointer",          // cursor changes to hand
                                         "&:hover svg": {
                                             color: "yellow",          // icon turns yellow on hover
@@ -146,6 +149,7 @@ const EmpSummary = () => {
                                         },
                                     }}><CleanHandsIcon onClick={()=>{setOpenDialog(true),setEmpName(sum.firstName),setEmpKey(sum.empPrimaryKey),setToBepaidAmount(sum.balanceAmount)}}/>
                                     </TableCell>
+                                    }
 
                                 </TableRow>
                             ))}
