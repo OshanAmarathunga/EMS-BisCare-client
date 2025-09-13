@@ -22,7 +22,9 @@ import Adjestment from "./Adjestment.jsx";
 import CashAdvance from "./CashAdvance.jsx";
 import Bonus from "./Bonus.jsx";
 import EmpSummary from "./EmpSummary.jsx";
+import PaymentDetails from "./PaymentDetails.jsx";
 const drawerWidth = 240;
+import logo from "../assets/logo.jpg";
 
 
 function Home(props) {
@@ -104,6 +106,8 @@ function Home(props) {
                 return <Bonus/>;
             case "Summary":
                 return <EmpSummary/>
+            case "Payment":
+                return <PaymentDetails/>
         }
     };
 
@@ -127,6 +131,9 @@ function Home(props) {
                     >
                         <MenuIcon />
                     </IconButton>
+                        <div className="mr-5">
+                            <img className="size-[50px] rounded-xl" src={logo} alt="Logo" width="200" />
+                        </div>
                     <Typography variant="h6" noWrap component="div" >
                         EMS-BisCare
                     </Typography>

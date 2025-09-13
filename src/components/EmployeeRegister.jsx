@@ -211,7 +211,9 @@ const EmployeeRegister = () => {
                     <TableContainer  sx={{
                         maxWidth:{
                             xs: 450, md: '100%'
-                        }
+                        },
+                        maxHeight: 250,
+                        overflowY: 'auto'
                     }}>
                         <Table  size="small" aria-label="a dense table" sx={{ minWidth: 900 }}>
                             <TableHead>

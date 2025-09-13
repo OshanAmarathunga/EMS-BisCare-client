@@ -176,13 +176,18 @@ function Adjestment() {
                 <TableContainer  sx={{
                     maxWidth:{
                         xs: 450, md: '100%'
-                    }
+                    },
+                    maxHeight: 500,
+                    overflowY: 'auto'
                 }}>
                     <Table  size="small" aria-label="a dense table" sx={{ minWidth: 300 }}>
                         <TableHead>
                             <TableRow>
                                 <TableCell align="center">In-Time</TableCell>
                                 <TableCell align="center">Out-Time</TableCell>
+                                <TableCell align="center">Rate</TableCell>
+                                <TableCell align="center">Working Hours</TableCell>
+                                <TableCell align="center">Earning</TableCell>
                                 <TableCell align="center">Status</TableCell>
 
                             </TableRow>
@@ -192,6 +197,9 @@ function Adjestment() {
                                     <TableRow key={emp._id}>
                                         <TableCell align="center">{formatSLDateTime(emp.startDateTime)}</TableCell>
                                         <TableCell align="center">{formatSLDateTime(emp?.endDateTime)}</TableCell>
+                                        <TableCell align="center">{emp.relevantRate}</TableCell>
+                                        <TableCell align="center">{emp.workingHours}</TableCell>
+                                        <TableCell align="center">{emp.slotEarningAmount}</TableCell>
                                         <TableCell align="center">{emp.isActive==true?
                                             <Button onClick={(e)=>{handleDialogOpen(),setWorkingHourKey(emp._id)}}  variant="contained" color="success" sx={{ padding: "0.01px 0.1px" }}>
                                                 Valid

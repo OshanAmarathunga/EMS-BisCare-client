@@ -14,17 +14,20 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import CancelIcon from '@mui/icons-material/Cancel';
 
-function CashAdvance() {
+function PaymentDetails() {
     const [empList,setEmpList] = useState([]);
     const url=import.meta.env.VITE_SERVER_URL;
     const [empPrimaryKey,setEmpPrimaryKey] = useState("");
     const [open, setOpen] = React.useState(false);
-    const [cashAdvanceList,setCashAdvanceList]=useState([]);
+    const [paymentList,setPaymentList]=useState([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [amount,setAmount]=useState("");
     const [empName,setEmpName]=useState("");
     const [openVerifyDialog,setOpenVerifyDialog]=useState(false)
-    const [cashAdvanceId,setCashAdvanceId]=useState("");
+    const [paymentId,setPaymentId]=useState("");
+    const [totalPaidAmount,setTotalPaidAmount]=useState("");
+    const [balanceAmount,setBalanceAmount]=useState("");
+    const [transactionAmt,setTransactionAmt]=useState("");
 
     const handleClose = () => {
         setOpen(false);
@@ -51,12 +54,13 @@ function CashAdvance() {
             })
     }
 
-    const getCashAdvanceList=()=>{
+    const getPaymentList=()=>{
         handleOpen();
-        console.log("empPrimaryKey",empPrimaryKey);
-        axios.get(url+`/v1/cash-advance/get-all-cash-advance/${empPrimaryKey}`)
+        axios.get(url+`/v1/payment-detail/get-employee-payment/${empPrimaryKey}`)
             .then((res)=>{
-                setCashAdvanceList(res.data.cashAdvanceList);
+                setTotalPaidAmount(res.data.totalPaidAmount);
+                setBalanceAmount(res.data.balanceAmount);
+                setPaymentList(res.data.paymentList);
                 handleClose();
             })
             .catch((e)=>{
@@ -65,24 +69,30 @@ function CashAdvance() {
             })
     }
 
-    const saveCashAdvance=()=>{
-        handleOpen();
-        const data={
-            empNoPrimaryKey:empPrimaryKey,
-            amount:amount
+    const savePayment=()=>{
+        if(amount>balanceAmount){
+            toast.error("you can not pay more than Rs."+balanceAmount);
+        }else {
+            handleOpen();
+            const data={
+                empPrimaryKey:empPrimaryKey,
+                amount:amount
+            }
+            axios.post(url+"/v1/payment-detail/employee-payment", data)
+                .then((res)=>{
+                    handleClose();
+                    setOpenDialog(false);
+                    toast.success('Cash Advance saved!');
+                    getPaymentList();
+                    setAmount("");
+                })
+                .catch((error)=>{
+                    console.log(error)
+                    handleClose();
+                    setOpenDialog(false);
+                    toast.error('Not saved CASH advance: '+error.message);
+                })
         }
-        axios.post(url+"/v1/cash-advance/save-cash-advance", data)
-            .then((res)=>{
-                handleClose();
-                setOpenDialog(false);
-                toast.success('Cash Advance saved!');
-                getCashAdvanceList();
-            })
-            .catch((error)=>{
-                handleClose();
-                setOpenDialog(false);
-                toast.error('Not saved CASH advance: '+error.message);
-            })
     }
 
     function formatSLDateTime(dateString){
@@ -106,18 +116,22 @@ function CashAdvance() {
     },[]);
 
     function handleConfirm(){
-        handleOpen();
-        axios.put(url+`/v1/cash-advance/change-status/${cashAdvanceId}`)
-            .then((res)=>{
-                handleClose();
-                toast.success('Updated success!');
-                getCashAdvanceList();
-                setOpenVerifyDialog(false);
-            })
-            .catch((error)=>{
-                handleClose();
-                toast.error('Not updated: '+error.message);
-            })
+        if (balanceAmount<transactionAmt){
+            setOpenVerifyDialog(false);
+            toast.error("You can not exceed the maximum amount : "+balanceAmount);
+        }else {
+            setOpenVerifyDialog(false);
+            handleOpen();
+            axios.put(url+`/v1/payment-detail/change-status/${paymentId}`)
+                .then((res)=>{
+                    toast.success('Updated success!');
+                    getPaymentList();
+                })
+                .catch((error)=>{
+                    handleClose();
+                    toast.error('Not updated: '+error.message);
+                })
+        }
     }
     return (
         <div>
@@ -128,7 +142,12 @@ function CashAdvance() {
             >
                 <CircularProgress color="inherit" />
             </Backdrop>
-            <h1 className='text-2xl font-bold'>Cash Advance</h1>
+            <div className="grid sm:grid-cols-1 lg:grid-cols-3  content-center">
+                <div><h1 className='text-2xl font-bold'>Payment Details</h1></div>
+                <div className="bg-amber-300 rounded-xl mx-5 p-3 mb-2 font-bold">Total Paid : Rs.{totalPaidAmount}</div>
+                <div className="bg-amber-300 rounded-xl mx-5 p-3 mb-2 font-bold">Payable Amount : Rs.{balanceAmount}</div>
+
+            </div>
             <br/>
             <div className='my-2 grid grid-cols-3 justify-items-center items-center'>
                 <div>
@@ -151,20 +170,21 @@ function CashAdvance() {
                     </select>
                 </div>
                 <div >
-                    <Button sx={{ padding: "2px 8px" }} disabled={empPrimaryKey==""?true:false} onClick={()=>getCashAdvanceList()} variant="contained" color="success">
+                    <Button sx={{ padding: "2px 8px" }} disabled={empPrimaryKey==""?true:false} onClick={()=>getPaymentList()} variant="contained" color="success">
                         Search
                     </Button>
                 </div>
-                <div >
+                {balanceAmount!=0 &&
+                    <div >
                     <Button sx={{ padding: "2px 8px" }} disabled={empPrimaryKey==""?true:false} onClick={()=>{setOpenDialog(true)}}  variant="contained" color="warning">
                         +
                     </Button>
-                </div>
+                </div>}
             </div>
             <div>
                 <div >
                     <Dialog open={openDialog} onClose={handleClose}>
-                        <DialogTitle>Add cash Advance to {empName}</DialogTitle>
+                        <DialogTitle>Add Payment to {empName}</DialogTitle>
                         <DialogContent>
                             <TextField
                                 margin="dense"
@@ -178,8 +198,8 @@ function CashAdvance() {
                         </DialogContent>
                         <DialogActions>
                             <Button onClick={handleCloseDialog}>Cancel</Button>
-                            <Button variant="contained" onClick={saveCashAdvance}>
-                                Update
+                            <Button variant="contained" onClick={savePayment}>
+                                Pay
                             </Button>
                         </DialogActions>
                     </Dialog>
@@ -202,16 +222,18 @@ function CashAdvance() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {cashAdvanceList.map((emp) => (
+                            {paymentList.map((bonus) => (
                                 <TableRow
-                                    key={emp._id}
+                                    key={bonus._id}
                                 >
-                                    <TableCell align="center">{formatSLDateTime(emp.date)}</TableCell>
-                                    <TableCell align="center">{emp.amount}</TableCell>
-                                    <TableCell align="center">{emp.status==true?
-                                        <Button onClick={(e)=>{setOpenVerifyDialog(true),setCashAdvanceId(emp._id)}}  variant="contained" color="success" sx={{ padding: "0.01px 0.1px" }}>
+                                    <TableCell align="center">{formatSLDateTime(bonus.date)}</TableCell>
+                                    <TableCell align="center">{bonus.amount}</TableCell>
+                                    <TableCell align="center">{bonus.status==true?
+                                        <Button onClick={(e)=>{setOpenVerifyDialog(true),setPaymentId(bonus._id),setTransactionAmt(0)}}  variant="contained" color="success" sx={{ padding: "0.01px 0.1px" }}>
                                             Valid
-                                        </Button> :<CancelIcon sx={{ color: 'red' }} onClick={(e)=>{setOpenVerifyDialog(true),setCashAdvanceId(emp._id)}}/>
+                                        </Button>
+                                        :
+                                        <CancelIcon sx={{ color: 'red' }} onClick={(e)=>{setOpenVerifyDialog(true),setPaymentId(bonus._id),setTransactionAmt(bonus.amount)}}/>
                                     }</TableCell>
 
                                 </TableRow>
@@ -240,4 +262,4 @@ function CashAdvance() {
     );
 }
 
-export default CashAdvance;
+export default PaymentDetails;
